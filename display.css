@@ -1,0 +1,571 @@
+/* ==========================================================================
+   Auditorium Stage Display - High-Impact Ultra-Visible Cinema/Stage Stylesheet
+   Designed for massive projectors, confidence monitors, and auditorium LED walls.
+   ========================================================================== */
+
+:root {
+  --bg-color: #030712;
+  --text-normal: #ffffff;
+  --glow-normal: rgba(255, 255, 255, 0.12);
+  
+  --color-warning: #f59e0b;
+  --glow-warning: rgba(245, 158, 11, 0.5);
+  --bg-warning: #1c1305;
+
+  --color-danger: #ef4444;
+  --glow-danger: rgba(239, 68, 68, 0.65);
+  --bg-danger: #200808;
+
+  --color-timeup: #ff113a;
+  --glow-timeup: rgba(255, 17, 58, 0.9);
+
+  --font-timer: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --transition-theme: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
+}
+
+/* ==========================================
+   FULL-SCREEN AUDITORIUM THEMES
+   ========================================== */
+
+/* 1. Cyber Black (Default) */
+body.theme-cyber-black {
+  --bg-color: #030712;
+  --text-normal: #ffffff;
+  --glow-normal: rgba(56, 189, 248, 0.2);
+}
+
+/* 2. Radial Loader / Circular Progress Ring Theme */
+body.theme-orbital-ring {
+  --bg-color: #030712;
+  --text-normal: #ffffff;
+  --glow-normal: rgba(6, 182, 212, 0.25);
+  --ring-color: #06b6d4;
+  --ring-glow: rgba(6, 182, 212, 0.7);
+}
+body.theme-orbital-ring.state-warning {
+  --ring-color: var(--color-warning);
+  --ring-glow: var(--glow-warning);
+}
+body.theme-orbital-ring.state-danger {
+  --ring-color: var(--color-danger);
+  --ring-glow: var(--glow-danger);
+}
+body.theme-orbital-ring.state-timeup {
+  --ring-color: var(--color-timeup);
+  --ring-glow: var(--glow-timeup);
+}
+
+/* 3. Cinema High-Contrast (OLED Void Black) */
+body.theme-high-contrast {
+  --bg-color: #000000;
+  --text-normal: #ffffff;
+  --glow-normal: rgba(255, 255, 255, 0.05);
+  --color-warning: #facc15;
+  --color-danger: #ff2222;
+}
+body.theme-high-contrast .ambient-glow {
+  display: none;
+}
+
+/* 4. Warm Gold / Champagne Gala */
+body.theme-warm-gold {
+  --bg-color: #0c0a06;
+  --text-normal: #fef08a;
+  --glow-normal: rgba(254, 240, 138, 0.25);
+  --color-warning: #fb923c;
+  --color-danger: #f43f5e;
+}
+body.theme-warm-gold .speaker-name {
+  color: #ca8a04;
+}
+
+/* 5. Neon Matrix Emerald */
+body.theme-neon-matrix {
+  --bg-color: #020f06;
+  --text-normal: #4ade80;
+  --glow-normal: rgba(74, 222, 128, 0.35);
+  --color-warning: #facc15;
+  --color-danger: #ff0055;
+}
+body.theme-neon-matrix .speaker-name {
+  color: #22c55e;
+}
+
+/* 6. Daylight Clean (Daylight / Lit Seminar Halls) */
+body.theme-daylight-clean {
+  --bg-color: #f8fafc;
+  --text-normal: #0f172a;
+  --glow-normal: rgba(0, 0, 0, 0.03);
+  --bg-warning: #fffbeb;
+  --bg-danger: #fef2f2;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+}
+body.theme-daylight-clean .speaker-name,
+body.theme-daylight-clean .clock-display {
+  color: #334155;
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+body.theme-daylight-clean .status-pill {
+  color: #475569;
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+body.theme-daylight-clean .stage-progress-container {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* 7. Midnight Studio Navy */
+body.theme-midnight-navy {
+  --bg-color: #020817;
+  --text-normal: #e0f2fe;
+  --glow-normal: rgba(14, 165, 233, 0.3);
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+}
+
+/* ==========================================
+   GLOBAL LAYOUT & RESPONSIVENESS
+   ========================================== */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-color);
+  color: var(--text-normal);
+  font-family: var(--font-timer);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: var(--transition-theme);
+}
+
+body.idle-cursor {
+  cursor: none;
+}
+
+.ambient-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90vw;
+  height: 90vh;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--glow-normal) 0%, transparent 68%);
+  pointer-events: none;
+  opacity: 0.7;
+  transition: all 0.5s ease;
+  z-index: 1;
+}
+
+.stage-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2vh 2.5vw;
+  z-index: 2;
+}
+
+/* Header bar */
+.stage-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 38px;
+  opacity: 0.85;
+}
+
+.speaker-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.speaker-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #10b981;
+  box-shadow: 0 0 10px #10b981;
+}
+
+.speaker-name {
+  font-size: clamp(14px, 2vw, 22px);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.talk-title {
+  font-size: clamp(12px, 1.6vw, 18px);
+  color: #64748b;
+  font-weight: 400;
+  margin-left: 8px;
+}
+
+.clock-display {
+  font-size: clamp(14px, 2vw, 24px);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  font-variant-numeric: tabular-nums;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 4px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Central Stage Timer */
+.timer-center-stage {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  min-height: 0;
+}
+
+/* Time's Up Flash Pill */
+.timeup-pill {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  background: var(--color-timeup);
+  color: #ffffff;
+  padding: 8px 36px;
+  border-radius: 999px;
+  font-size: clamp(16px, 2.8vw, 36px);
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  box-shadow: 0 0 50px var(--glow-timeup);
+  animation: strobe-badge 0.6s infinite alternate ease-in-out;
+  margin-bottom: 1.5vh;
+}
+
+/* Circular Loader Container */
+.circular-progress-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.circular-progress-svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  width: min(88vw, 78vh);
+  height: min(88vw, 78vh);
+  pointer-events: none;
+  display: none;
+  z-index: 1;
+}
+
+.circle-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 14;
+}
+
+.circle-bar {
+  fill: none;
+  stroke: var(--ring-color, #06b6d4);
+  stroke-width: 22;
+  stroke-linecap: round;
+  stroke-dasharray: 2764.6;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.4s linear, stroke 0.3s ease;
+  filter: drop-shadow(0 0 16px var(--ring-glow, rgba(6, 182, 212, 0.7)));
+}
+
+/* Enable circular loader when theme-orbital-ring is active */
+body.theme-orbital-ring .circular-progress-svg {
+  display: block;
+}
+
+/* Keep bottom bar subtle in orbital ring theme */
+body.theme-orbital-ring .stage-progress-container {
+  opacity: 0.15;
+}
+
+/* Digits Wrapper */
+.digit-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+  flex: 1;
+  min-height: 0;
+  z-index: 2;
+}
+
+.countdown-digits {
+  font-family: var(--font-timer);
+  /* Standard MM:SS massive vertical fill */
+  font-size: min(38vw, 70vh);
+  font-weight: 900;
+  line-height: 0.82;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 4px 35px rgba(0, 0, 0, 0.8);
+  transition: color 0.3s ease, text-shadow 0.3s ease, font-size 0.3s ease;
+  will-change: transform;
+  display: inline-block;
+}
+
+/* SECONDS ALONE FORMAT (Colossal, fills up to 78vh vertically) */
+.countdown-digits.seconds-format {
+  font-size: min(45vw, 78vh);
+  letter-spacing: -0.02em;
+}
+
+/* Long format for HH:MM:SS */
+.countdown-digits.long-format {
+  font-size: min(25vw, 60vh);
+}
+
+/* Adaptive sizing inside circular ring */
+body.theme-orbital-ring .countdown-digits {
+  font-size: min(29vw, 45vh);
+  line-height: 0.85;
+}
+
+body.theme-orbital-ring .countdown-digits.seconds-format {
+  font-size: min(38vw, 56vh);
+}
+
+body.theme-orbital-ring .countdown-digits.long-format {
+  font-size: min(21vw, 34vh);
+}
+
+/* ==========================================
+   ALERT STATES: WARNING, DANGER, ZERO FLASH
+   ========================================== */
+
+/* Warning State (Amber) */
+body.state-warning {
+  background-color: var(--bg-warning);
+}
+body.state-warning .ambient-glow {
+  background: radial-gradient(circle, var(--glow-warning) 0%, transparent 70%);
+}
+body.state-warning .countdown-digits {
+  color: var(--color-warning);
+  text-shadow: 0 0 60px var(--glow-warning);
+}
+
+/* Danger State (Red) */
+body.state-danger {
+  background-color: var(--bg-danger);
+}
+body.state-danger .ambient-glow {
+  background: radial-gradient(circle, var(--glow-danger) 0%, transparent 70%);
+}
+body.state-danger .countdown-digits {
+  color: var(--color-danger);
+  text-shadow: 0 0 80px var(--glow-danger);
+  animation: urgent-pulse 1s infinite alternate ease-in-out;
+}
+
+/* TIME'S UP ZERO HIT - FLASH ONLY (NO NEGATIVE COUNTING) */
+body.state-timeup {
+  background-color: #2b0308;
+  animation: background-strobe 0.8s infinite alternate ease-in-out;
+}
+body.state-timeup .timeup-pill {
+  display: inline-flex;
+}
+body.state-timeup .ambient-glow {
+  background: radial-gradient(circle, var(--glow-timeup) 0%, transparent 70%);
+}
+body.state-timeup .countdown-digits {
+  color: #ffffff;
+  text-shadow: 0 0 80px var(--color-timeup), 0 0 30px #ffffff;
+  animation: zero-flash 0.8s infinite alternate ease-in-out;
+}
+
+/* Stage Message Alert Overlay */
+.stage-message-overlay {
+  display: none;
+  width: 90%;
+  max-width: 1400px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 3px solid #38bdf8;
+  box-shadow: 0 0 50px rgba(56, 189, 248, 0.5);
+  border-radius: 20px;
+  padding: 16px 40px;
+  margin-top: 1.5vh;
+  text-align: center;
+  backdrop-filter: blur(16px);
+  animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stage-message-overlay.visible {
+  display: block;
+}
+
+.stage-message-overlay.alert-urgent {
+  background: rgba(220, 38, 38, 0.95);
+  border-color: #ffffff;
+  box-shadow: 0 0 60px rgba(239, 68, 68, 0.8);
+}
+
+.stage-message-text {
+  font-size: clamp(20px, 3.8vw, 50px);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+/* Stage Progress Bar */
+.stage-progress-container {
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 1.2vh;
+}
+
+.stage-progress-bar {
+  height: 100%;
+  width: 100%;
+  background: #38bdf8;
+  border-radius: 999px;
+  transition: width 0.4s linear, background-color 0.4s ease;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.7);
+}
+
+body.state-warning .stage-progress-bar {
+  background: var(--color-warning);
+  box-shadow: 0 0 20px var(--glow-warning);
+}
+
+body.state-danger .stage-progress-bar,
+body.state-timeup .stage-progress-bar {
+  background: var(--color-danger);
+  box-shadow: 0 0 25px var(--glow-danger);
+}
+
+/* Blackout Screen */
+body.state-blackout .stage-container,
+body.state-blackout .ambient-glow {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+body.state-blackout {
+  background-color: #000000 !important;
+}
+
+/* Status Pill */
+.status-pill {
+  font-size: clamp(12px, 1.6vw, 18px);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 4px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  margin-top: 0.5vh;
+}
+
+/* Stage Toolbar */
+.stage-toolbar {
+  position: absolute;
+  bottom: 18px;
+  right: 25px;
+  display: flex;
+  gap: 10px;
+  opacity: 0.2;
+  transition: opacity 0.3s ease;
+  z-index: 100;
+}
+
+.stage-toolbar:hover,
+body:not(.idle-cursor) .stage-toolbar {
+  opacity: 0.85;
+}
+
+.stage-btn {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e2e8f0;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.stage-btn:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: #38bdf8;
+  color: #38bdf8;
+  transform: scale(1.06);
+}
+
+.stage-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* Animations */
+@keyframes urgent-pulse {
+  0% { transform: scale(1); filter: brightness(1); }
+  100% { transform: scale(1.02); filter: brightness(1.2); }
+}
+
+@keyframes zero-flash {
+  0% { transform: scale(1); opacity: 1; filter: brightness(1); }
+  100% { transform: scale(1.04); opacity: 0.88; filter: brightness(1.3); }
+}
+
+@keyframes background-strobe {
+  0% { background-color: #1a0305; }
+  100% { background-color: #4a070e; }
+}
+
+@keyframes strobe-badge {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.08); box-shadow: 0 0 70px #ff113a; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(25px); }
+  to { opacity: 1; transform: translateY(0); }
+}

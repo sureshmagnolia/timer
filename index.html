@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auditorium Countdown Timer - Operator Control Desk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="controller.css">
+</head>
+<body>
+
+  <!-- Top Navigation & Broadcast Header -->
+  <header class="console-header">
+    <div class="brand-section">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/></svg>
+      </div>
+      <div class="brand-text">
+        <h1>AUDITORIUM TIMER</h1>
+        <p>Master AV Control Console • Stage Synchronization</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <div class="wall-clock-badge" id="ctrlWallClock">12:00:00</div>
+      
+      <!-- Dual Screen Simulator link -->
+      <a href="split.html" style="text-decoration:none;" class="wall-clock-badge" title="View both screens side-by-side">
+        ⚡ DUAL SIMULATOR
+      </a>
+
+      <!-- Button to pop open the stage display on 2nd monitor / projector -->
+      <button class="btn-launch-display" id="btnLaunchDisplay">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 4H5c-1.11 0-2 .9-2 2v11c0 1.1.89 2 2 2h4l-2 3v1h10v-1l-2-3h4c1.1 0 2-.9 2-2V6c0-1.1-.89-2-2-2zm0 13H5V6h14v11z"/></svg>
+        <span>LAUNCH STAGE DISPLAY</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Console Workstation -->
+  <main class="console-body">
+
+    <!-- Left Column: Live Stage Monitor & Primary Controls -->
+    <div class="left-col">
+
+      <!-- Live Stage Monitor Preview (Shows what audience sees) -->
+      <section class="console-card">
+        <div class="card-title-row">
+          <span class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
+            LIVE AUDITORIUM STAGE MONITOR
+          </span>
+          <span class="live-badge">
+            <span class="live-dot"></span>
+            <span id="monitorStatusText">STANDBY</span>
+          </span>
+        </div>
+
+        <div class="stage-preview-box state-normal" id="stagePreviewBox">
+          <div class="preview-pill-row">
+            <span id="previewSpeakerTag" style="font-size:12px; font-weight:700; color:#94a3b8; text-transform:uppercase;">STAGE 1 • MAIN HALL</span>
+            <span class="preview-phase-badge" id="previewPhaseBadge">NORMAL PHASE</span>
+          </div>
+
+          <div class="preview-time-display" id="previewTimeDisplay">10:00</div>
+
+          <!-- Live mirror of stage message -->
+          <div class="preview-message-ticker" id="previewMessageTicker">
+            STAGE MESSAGE: <span id="previewMessageText"></span>
+          </div>
+        </div>
+
+        <!-- Master Start / Pause / Reset Action Grid -->
+        <div class="master-controls-grid">
+          <button class="ctrl-btn btn-start" id="btnStartPause">
+            <svg id="iconPlay" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="iconPause" style="display:none;" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            <span id="btnStartText">START TIMER</span>
+          </button>
+          
+          <button class="ctrl-btn btn-pause" id="btnHold">
+            <svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            <span>PAUSE</span>
+          </button>
+
+          <button class="ctrl-btn btn-reset" id="btnReset">
+            <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+            <span>RESET</span>
+          </button>
+        </div>
+
+        <!-- On-The-Fly Quick Time Adjustments -->
+        <div class="quick-adjust-bar">
+          <button class="adjust-pill" id="btnAdd1m">+1 MIN</button>
+          <button class="adjust-pill" id="btnSub1m">-1 MIN</button>
+          <button class="adjust-pill" id="btnAdd30s">+30 SEC</button>
+          <button class="adjust-pill" id="btnSub30s">-30 SEC</button>
+          <button class="adjust-pill" id="btnAdd5m">+5 MIN</button>
+        </div>
+      </section>
+
+      <!-- Presets & Custom Duration Section -->
+      <section class="console-card">
+        <div class="card-title-row">
+          <span class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
+            QUICK SESSION PRESETS
+          </span>
+        </div>
+
+        <div class="preset-grid">
+          <div class="preset-chip" data-seconds="180">
+            <div class="preset-time">03:00</div>
+            <div class="preset-label">Flash Talk</div>
+          </div>
+          <div class="preset-chip" data-seconds="300">
+            <div class="preset-time">05:00</div>
+            <div class="preset-label">Lightning / Pitch</div>
+          </div>
+          <div class="preset-chip" data-seconds="600">
+            <div class="preset-time">10:00</div>
+            <div class="preset-label">Brief Demo</div>
+          </div>
+          <div class="preset-chip" data-seconds="900">
+            <div class="preset-time">15:00</div>
+            <div class="preset-label">Short Keynote</div>
+          </div>
+          <div class="preset-chip" data-seconds="1200">
+            <div class="preset-time">20:00</div>
+            <div class="preset-label">Standard Talk</div>
+          </div>
+          <div class="preset-chip" data-seconds="1800">
+            <div class="preset-time">30:00</div>
+            <div class="preset-label">Full Session</div>
+          </div>
+          <div class="preset-chip" data-seconds="2700">
+            <div class="preset-time">45:00</div>
+            <div class="preset-label">Lecture</div>
+          </div>
+          <div class="preset-chip" data-seconds="3600">
+            <div class="preset-time">60:00</div>
+            <div class="preset-label">Panel Discussion</div>
+          </div>
+        </div>
+
+        <!-- Custom Duration Form -->
+        <div class="custom-time-form">
+          <div class="time-input-group">
+            <input type="number" id="inputHours" min="0" max="23" value="0">
+            <label>HR</label>
+          </div>
+          <span style="font-size:18px; font-weight:700; color:#64748b;">:</span>
+          <div class="time-input-group">
+            <input type="number" id="inputMinutes" min="0" max="59" value="10">
+            <label>MIN</label>
+          </div>
+          <span style="font-size:18px; font-weight:700; color:#64748b;">:</span>
+          <div class="time-input-group">
+            <input type="number" id="inputSeconds" min="0" max="59" value="0">
+            <label>SEC</label>
+          </div>
+
+          <button class="btn-apply-time" id="btnApplyCustomTime">SET TIMER</button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right Column: Warning Thresholds, Stage Messaging & AV Utilities -->
+    <div class="right-col">
+
+      <!-- Warning & Danger Thresholds -->
+      <section class="console-card">
+        <div class="card-title-row">
+          <span class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+            STAGE WARNING THRESHOLDS
+          </span>
+        </div>
+
+        <div class="thresholds-container">
+          <!-- Amber Warning Section -->
+          <div class="threshold-group">
+            <div class="threshold-header">
+              <span style="color:var(--accent-amber); font-weight:700;">🟡 Amber Warning</span>
+              <span class="threshold-value" id="valWarningSec">120s (02:00)</span>
+            </div>
+
+            <!-- Quick Preset Chips for Warning Time -->
+            <div class="threshold-chips" id="warningChips">
+              <button type="button" class="th-chip" data-sec="30">30s</button>
+              <button type="button" class="th-chip" data-sec="60">1 min</button>
+              <button type="button" class="th-chip" data-sec="120">2 min</button>
+              <button type="button" class="th-chip" data-sec="180">3 min</button>
+              <button type="button" class="th-chip" data-sec="300">5 min</button>
+            </div>
+
+            <!-- Direct Numeric Input for Admin -->
+            <div class="threshold-input-row">
+              <span class="threshold-unit-label">Custom:</span>
+              <input type="number" class="threshold-input" id="inputNumWarning" min="5" max="3600" step="5" value="120">
+              <span class="threshold-unit-label">sec</span>
+              <button type="button" class="th-chip" id="btnApplyWarning" style="margin-left:auto; background:var(--accent-cyan); color:#fff; border:none;">SET</button>
+            </div>
+
+            <input type="range" class="threshold-slider" id="sliderWarning" min="5" max="600" step="5" value="120">
+          </div>
+
+          <!-- Critical Red Section -->
+          <div class="threshold-group">
+            <div class="threshold-header">
+              <span style="color:var(--accent-rose); font-weight:700;">🔴 Critical Red Alert</span>
+              <span class="threshold-value" id="valDangerSec">30s (00:30)</span>
+            </div>
+
+            <!-- Quick Preset Chips for Red Alert -->
+            <div class="threshold-chips" id="dangerChips">
+              <button type="button" class="th-chip th-chip-danger" data-sec="10">10s</button>
+              <button type="button" class="th-chip th-chip-danger" data-sec="15">15s</button>
+              <button type="button" class="th-chip th-chip-danger" data-sec="30">30s</button>
+              <button type="button" class="th-chip th-chip-danger" data-sec="60">1 min</button>
+            </div>
+
+            <!-- Direct Numeric Input for Admin -->
+            <div class="threshold-input-row">
+              <span class="threshold-unit-label">Custom:</span>
+              <input type="number" class="threshold-input" id="inputNumDanger" min="5" max="600" step="5" value="30">
+              <span class="threshold-unit-label">sec</span>
+              <button type="button" class="th-chip th-chip-danger" id="btnApplyDanger" style="margin-left:auto; background:var(--accent-rose); color:#fff; border:none;">SET</button>
+            </div>
+
+            <input type="range" class="threshold-slider danger-slider" id="sliderDanger" min="5" max="300" step="5" value="30">
+          </div>
+        </div>
+
+        <!-- Time Display Format (Standard MM:SS vs Seconds Alone) -->
+        <div style="margin-top:16px;">
+          <div class="threshold-header" style="margin-bottom:8px;">
+            <span style="color:#cbd5e1; font-weight:700;">⏱️ Time Display Mode</span>
+            <span id="valFormatMode" style="color:var(--accent-cyan); font-weight:700;">MM:SS</span>
+          </div>
+          <div class="threshold-chips" id="formatChips">
+            <button type="button" class="th-chip active" data-fmt="standard">MM:SS (Standard)</button>
+            <button type="button" class="th-chip" data-fmt="seconds">⚡ Seconds Alone</button>
+            <button type="button" class="th-chip" data-fmt="auto">🔄 Auto (Sec &lt; 1m)</button>
+          </div>
+        </div>
+
+        <!-- Zero Hit Strobe Flash Indicator (No negative counting) -->
+        <div style="margin-top:14px; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.25); border-radius:8px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-size:12px; color:#fca5a5; font-weight:600;">🛑 Zero Hit Action</span>
+          <span style="font-size:11px; font-weight:800; color:#ef4444; background:rgba(239, 68, 68, 0.2); padding:3px 8px; border-radius:4px;">FREEZE AT 00:00 & FLASH</span>
+        </div>
+      </section>
+
+      <!-- Stage Full-Screen Themes -->
+      <section class="console-card">
+        <div class="card-title-row">
+          <span class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8z"/></svg>
+            FULL-SCREEN AUDITORIUM THEMES
+          </span>
+          <span id="currentThemeLabel" style="font-size:11px; color:#38bdf8; font-weight:700; text-transform:uppercase;">CYBER BLACK</span>
+        </div>
+
+        <div class="preset-grid" style="grid-template-columns: repeat(4, 1fr); gap: 8px;" id="themeGrid">
+          <div class="preset-chip active" data-theme="cyber-black" style="border-left: 3px solid #38bdf8;">
+            <div style="font-size:12px; font-weight:700;">Cyber Black</div>
+            <div class="preset-label">Default Dark</div>
+          </div>
+          <div class="preset-chip" data-theme="orbital-ring" style="border-left: 3px solid #06b6d4;">
+            <div style="font-size:12px; font-weight:700;">⭕ Radial Loader</div>
+            <div class="preset-label">Circular Ring</div>
+          </div>
+          <div class="preset-chip" data-theme="high-contrast" style="border-left: 3px solid #ffffff;">
+            <div style="font-size:12px; font-weight:700;">Cinema OLED</div>
+            <div class="preset-label">Pure Contrast</div>
+          </div>
+          <div class="preset-chip" data-theme="warm-gold" style="border-left: 3px solid #facc15;">
+            <div style="font-size:12px; font-weight:700;">Warm Gold</div>
+            <div class="preset-label">Executive Gala</div>
+          </div>
+          <div class="preset-chip" data-theme="neon-matrix" style="border-left: 3px solid #22c55e;">
+            <div style="font-size:12px; font-weight:700;">Neon Matrix</div>
+            <div class="preset-label">Electric Green</div>
+          </div>
+          <div class="preset-chip" data-theme="daylight-clean" style="border-left: 3px solid #94a3b8;">
+            <div style="font-size:12px; font-weight:700;">Daylight Clean</div>
+            <div class="preset-label">Lit Seminar</div>
+          </div>
+          <div class="preset-chip" data-theme="midnight-navy" style="border-left: 3px solid #0284c7;">
+            <div style="font-size:12px; font-weight:700;">Midnight Navy</div>
+            <div class="preset-label">Studio Blue</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stage Messaging & Prompts Broadcaster -->
+      <section class="console-card">
+        <div class="card-title-row">
+          <span class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+            BROADCAST STAGE PROMPTS & ALERTS
+          </span>
+        </div>
+
+        <div class="msg-input-row">
+          <input type="text" class="msg-input" id="inputStageMsg" placeholder="Type prompt to display on stage (e.g. 2 MINS LEFT)...">
+          <button class="btn-send-msg" id="btnSendMsg">BROADCAST</button>
+          <button class="btn-clear-msg" id="btnClearMsg">CLEAR</button>
+        </div>
+
+        <div class="quick-msg-pills">
+          <button class="quick-msg-btn" data-msg="⚠️ 2 MINUTES REMAINING">⚠️ 2 Mins Left</button>
+          <button class="quick-msg-btn" data-msg="🎤 START AUDIENCE Q&A">🎤 Start Q&A</button>
+          <button class="quick-msg-btn" data-msg="⏳ PLEASE WRAP UP NOW">⏳ Please Wrap Up</button>
+          <button class="quick-msg-btn" data-msg="🛑 TIME EXPIRED - THANK YOU">🛑 Time Expired</button>
+          <button class="quick-msg-btn" data-msg="📢 NEXT SPEAKER ON DECK">📢 Next Speaker Ready</button>
+        </div>
+      </section>
+
+      <!-- Speaker & Session Info -->
+      <section class="console-card">
+        <div class="card-title-row">
+          <span class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            SPEAKER & SESSION DETAILS
+          </span>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <input type="text" class="msg-input" id="inputSpeakerName" placeholder="Speaker Name (e.g. Dr. Jane Smith)">
+          <input type="text" class="msg-input" id="inputTalkTitle" placeholder="Presentation Title (e.g. Keynote Address)">
+          <button class="btn-apply-time" style="width:100%;" id="btnUpdateSpeakerInfo">UPDATE STAGE HEADER</button>
+        </div>
+      </section>
+
+      <!-- Stage AV Utilities: Audio & Blackout -->
+      <section class="console-card">
+        <div class="card-title-row">
+          <span class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
+            AV STAGE AUDIO & BLACKOUT
+          </span>
+        </div>
+
+        <div class="stage-utils-row">
+          <div class="util-toggle-card">
+            <span class="toggle-label">Audible Chimes</span>
+            <label class="switch">
+              <input type="checkbox" id="chkEnableAudio" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="util-toggle-card">
+            <span class="toggle-label" style="color:var(--accent-rose);">Stage Blackout</span>
+            <label class="switch">
+              <input type="checkbox" id="chkBlackout">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Sound Testing Buttons -->
+        <div class="sound-test-row">
+          <button class="btn-test-sound" id="btnTestWarning">Test Warning Chime</button>
+          <button class="btn-test-sound" id="btnTestDanger">Test Danger Beep</button>
+          <button class="btn-test-sound" id="btnTestTimeUp">Test Time's Up Gong</button>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Scripts -->
+  <script src="audio.js"></script>
+  <script src="timer-core.js"></script>
+  <script>
+    // Initialize Master Controller Engine
+    const engine = new TimerEngine(true); // isMaster = true
+
+    // DOM Elements
+    const ctrlWallClock = document.getElementById('ctrlWallClock');
+    const btnLaunchDisplay = document.getElementById('btnLaunchDisplay');
+    const stagePreviewBox = document.getElementById('stagePreviewBox');
+    const previewTimeDisplay = document.getElementById('previewTimeDisplay');
+    const previewPhaseBadge = document.getElementById('previewPhaseBadge');
+    const monitorStatusText = document.getElementById('monitorStatusText');
+    const previewSpeakerTag = document.getElementById('previewSpeakerTag');
+    const previewMessageTicker = document.getElementById('previewMessageTicker');
+    const previewMessageText = document.getElementById('previewMessageText');
+
+    const btnStartPause = document.getElementById('btnStartPause');
+    const btnStartText = document.getElementById('btnStartText');
+    const iconPlay = document.getElementById('iconPlay');
+    const iconPause = document.getElementById('iconPause');
+    const btnHold = document.getElementById('btnHold');
+    const btnReset = document.getElementById('btnReset');
+
+    const btnAdd1m = document.getElementById('btnAdd1m');
+    const btnSub1m = document.getElementById('btnSub1m');
+    const btnAdd30s = document.getElementById('btnAdd30s');
+    const btnSub30s = document.getElementById('btnSub30s');
+    const btnAdd5m = document.getElementById('btnAdd5m');
+
+    const inputHours = document.getElementById('inputHours');
+    const inputMinutes = document.getElementById('inputMinutes');
+    const inputSeconds = document.getElementById('inputSeconds');
+    const btnApplyCustomTime = document.getElementById('btnApplyCustomTime');
+
+    const sliderWarning = document.getElementById('sliderWarning');
+    const sliderDanger = document.getElementById('sliderDanger');
+    const valWarningSec = document.getElementById('valWarningSec');
+    const valDangerSec = document.getElementById('valDangerSec');
+    const inputNumWarning = document.getElementById('inputNumWarning');
+    const inputNumDanger = document.getElementById('inputNumDanger');
+    const btnApplyWarning = document.getElementById('btnApplyWarning');
+    const btnApplyDanger = document.getElementById('btnApplyDanger');
+    const warningChips = document.querySelectorAll('#warningChips .th-chip');
+    const dangerChips = document.querySelectorAll('#dangerChips .th-chip');
+    const chkAllowOvertime = document.getElementById('chkAllowOvertime');
+
+    const inputStageMsg = document.getElementById('inputStageMsg');
+    const btnSendMsg = document.getElementById('btnSendMsg');
+    const btnClearMsg = document.getElementById('btnClearMsg');
+
+    const inputSpeakerName = document.getElementById('inputSpeakerName');
+    const inputTalkTitle = document.getElementById('inputTalkTitle');
+    const btnUpdateSpeakerInfo = document.getElementById('btnUpdateSpeakerInfo');
+
+    const chkEnableAudio = document.getElementById('chkEnableAudio');
+    const chkBlackout = document.getElementById('chkBlackout');
+    const btnTestWarning = document.getElementById('btnTestWarning');
+    const btnTestDanger = document.getElementById('btnTestDanger');
+    const btnTestTimeUp = document.getElementById('btnTestTimeUp');
+
+    // Wall Clock
+    function updateClock() {
+      const now = new Date();
+      ctrlWallClock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Launch Stage Display in New Window
+    btnLaunchDisplay.addEventListener('click', () => {
+      window.open('display.html', 'AuditoriumStageDisplay', 'width=1920,height=1080,menubar=no,toolbar=no,location=no,status=no');
+    });
+
+    // Master Start / Resume / Pause Handler
+    btnStartPause.addEventListener('click', () => {
+      if (engine.state.status === 'running') {
+        engine.pause();
+      } else {
+        engine.start();
+      }
+    });
+
+    btnHold.addEventListener('click', () => {
+      engine.pause();
+    });
+
+    btnReset.addEventListener('click', () => {
+      engine.reset();
+    });
+
+    // Quick Adjust Buttons
+    btnAdd1m.addEventListener('click', () => engine.addTime(60));
+    btnSub1m.addEventListener('click', () => engine.addTime(-60));
+    btnAdd30s.addEventListener('click', () => engine.addTime(30));
+    btnSub30s.addEventListener('click', () => engine.addTime(-30));
+    btnAdd5m.addEventListener('click', () => engine.addTime(300));
+
+    // Preset chips
+    document.querySelectorAll('.preset-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const sec = parseInt(chip.dataset.seconds, 10);
+        engine.setDuration(sec);
+        // Also update form inputs
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = sec % 60;
+        inputHours.value = h;
+        inputMinutes.value = m;
+        inputSeconds.value = s;
+      });
+    });
+
+    // Custom Time Apply
+    btnApplyCustomTime.addEventListener('click', () => {
+      const h = parseInt(inputHours.value, 10) || 0;
+      const m = parseInt(inputMinutes.value, 10) || 0;
+      const s = parseInt(inputSeconds.value, 10) || 0;
+      const totalSec = (h * 3600) + (m * 60) + s;
+      if (totalSec > 0) {
+        engine.setDuration(totalSec);
+      }
+    });
+
+    // Set Warning Threshold helper
+    function setWarningSec(sec) {
+      const s = Math.max(5, parseInt(sec, 10));
+      sliderWarning.value = Math.min(600, s);
+      inputNumWarning.value = s;
+      valWarningSec.textContent = `${s}s (${TimerEngine.formatTime(s)})`;
+      warningChips.forEach(chip => {
+        chip.classList.toggle('active', parseInt(chip.dataset.sec, 10) === s);
+      });
+      engine.setWarningThresholds(s, engine.state.dangerSec);
+    }
+
+    // Set Danger Threshold helper
+    function setDangerSec(sec) {
+      const s = Math.max(1, parseInt(sec, 10));
+      sliderDanger.value = Math.min(300, s);
+      inputNumDanger.value = s;
+      valDangerSec.textContent = `${s}s (${TimerEngine.formatTime(s)})`;
+      dangerChips.forEach(chip => {
+        chip.classList.toggle('active', parseInt(chip.dataset.sec, 10) === s);
+      });
+      engine.setWarningThresholds(engine.state.warningSec, s);
+    }
+
+    // Sliders
+    sliderWarning.addEventListener('input', () => setWarningSec(sliderWarning.value));
+    sliderDanger.addEventListener('input', () => setDangerSec(sliderDanger.value));
+
+    // Direct Inputs & Apply Buttons
+    btnApplyWarning.addEventListener('click', () => setWarningSec(inputNumWarning.value));
+    inputNumWarning.addEventListener('change', () => setWarningSec(inputNumWarning.value));
+    inputNumWarning.addEventListener('keydown', (e) => { if (e.key === 'Enter') setWarningSec(inputNumWarning.value); });
+
+    btnApplyDanger.addEventListener('click', () => setDangerSec(inputNumDanger.value));
+    inputNumDanger.addEventListener('change', () => setDangerSec(inputNumDanger.value));
+    inputNumDanger.addEventListener('keydown', (e) => { if (e.key === 'Enter') setDangerSec(inputNumDanger.value); });
+
+    // Warning and Danger Chips
+    warningChips.forEach(chip => {
+      chip.addEventListener('click', () => setWarningSec(chip.dataset.sec));
+    });
+    dangerChips.forEach(chip => {
+      chip.addEventListener('click', () => setDangerSec(chip.dataset.sec));
+    });
+
+    // Format Chips
+    const formatChips = document.querySelectorAll('#formatChips .th-chip');
+    const valFormatMode = document.getElementById('valFormatMode');
+    formatChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        engine.setTimeFormat(chip.dataset.fmt);
+      });
+    });
+
+    // Theme Chips
+    const themeChips = document.querySelectorAll('#themeGrid .preset-chip');
+    const currentThemeLabel = document.getElementById('currentThemeLabel');
+    themeChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        engine.setTheme(chip.dataset.theme);
+      });
+    });
+
+    // Stage Message Broadcaster
+    btnSendMsg.addEventListener('click', () => {
+      const txt = inputStageMsg.value.trim();
+      if (txt) {
+        engine.setMessage(txt, true);
+      }
+    });
+
+    btnClearMsg.addEventListener('click', () => {
+      inputStageMsg.value = '';
+      engine.clearMessage();
+    });
+
+    // Quick Message Presets
+    document.querySelectorAll('.quick-msg-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const msg = btn.dataset.msg;
+        inputStageMsg.value = msg;
+        engine.setMessage(msg, true);
+      });
+    });
+
+    // Speaker Info Update
+    btnUpdateSpeakerInfo.addEventListener('click', () => {
+      engine.setSpeakerInfo(inputSpeakerName.value, inputTalkTitle.value);
+    });
+
+    // Audio & Blackout Toggles
+    chkEnableAudio.addEventListener('change', () => {
+      engine.setSound(chkEnableAudio.checked);
+    });
+
+    chkBlackout.addEventListener('change', () => {
+      engine.setBlackout(chkBlackout.checked);
+    });
+
+    // Sound Test Buttons
+    btnTestWarning.addEventListener('click', () => {
+      if (window.stageAudio) window.stageAudio.playWarningChime();
+    });
+    btnTestDanger.addEventListener('click', () => {
+      if (window.stageAudio) window.stageAudio.playDangerAlert();
+    });
+    btnTestTimeUp.addEventListener('click', () => {
+      if (window.stageAudio) window.stageAudio.playTimeUpSound();
+    });
+
+    // Subscribe to State Changes & Update Console UI
+    engine.subscribe((state) => {
+      // 1. Play/Pause Button State
+      if (state.status === 'running') {
+        btnStartText.textContent = 'PAUSE';
+        iconPlay.style.display = 'none';
+        iconPause.style.display = 'inline-block';
+        btnStartPause.classList.remove('btn-start');
+        btnStartPause.classList.add('btn-pause');
+        monitorStatusText.textContent = 'LIVE';
+      } else {
+        btnStartText.textContent = state.status === 'paused' ? 'RESUME' : 'START TIMER';
+        iconPlay.style.display = 'inline-block';
+        iconPause.style.display = 'none';
+        btnStartPause.classList.remove('btn-pause');
+        btnStartPause.classList.add('btn-start');
+        monitorStatusText.textContent = state.status === 'paused' ? 'PAUSED' : (state.isTimeUp ? "TIME'S UP" : 'STANDBY');
+      }
+
+      // 2. Live Stage Preview Box
+      const level = engine.getCurrentAlertLevel();
+      stagePreviewBox.className = 'stage-preview-box';
+
+      // ZERO HIT (NO NEGATIVE COUNTING - FLASH ONLY)
+      if (state.isTimeUp || state.remainingSec === 0) {
+        stagePreviewBox.classList.add('state-danger');
+        previewTimeDisplay.textContent = state.timeFormat === 'seconds' ? '0' : '00:00';
+        previewPhaseBadge.textContent = "TIME'S UP! (FLASHING)";
+        previewPhaseBadge.style.color = '#ef4444';
+      } else {
+        previewTimeDisplay.textContent = TimerEngine.formatDisplayTime(state.remainingSec, state.timeFormat);
+        if (level === 'danger') {
+          stagePreviewBox.classList.add('state-danger');
+          previewPhaseBadge.textContent = 'CRITICAL RED ALERT';
+          previewPhaseBadge.style.color = 'var(--accent-rose)';
+        } else if (level === 'warning') {
+          stagePreviewBox.classList.add('state-warning');
+          previewPhaseBadge.textContent = 'WARNING AMBER ALERT';
+          previewPhaseBadge.style.color = 'var(--accent-amber)';
+        } else {
+          stagePreviewBox.classList.add('state-normal');
+          previewPhaseBadge.textContent = 'NORMAL TIME';
+          previewPhaseBadge.style.color = '#94a3b8';
+        }
+      }
+
+      // 3. Format Chips Active State
+      formatChips.forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.fmt === (state.timeFormat || 'standard'));
+      });
+      valFormatMode.textContent = state.timeFormat === 'seconds' ? 'Seconds Alone' : (state.timeFormat === 'auto' ? 'Auto (< 1m)' : 'MM:SS');
+
+      // 4. Theme Chips Active State
+      themeChips.forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.theme === (state.theme || 'cyber-black'));
+      });
+      currentThemeLabel.textContent = (state.theme || 'cyber-black').replace('-', ' ').toUpperCase();
+
+      // 5. Stage Message Mirror
+      if (state.messageVisible && state.message) {
+        previewMessageTicker.classList.add('visible');
+        previewMessageText.textContent = state.message;
+      } else {
+        previewMessageTicker.classList.remove('visible');
+      }
+
+      // 6. Speaker Info Mirror
+      if (state.speakerName) {
+        previewSpeakerTag.textContent = `${state.speakerName} ${state.talkTitle ? '• ' + state.talkTitle : ''}`;
+      } else {
+        previewSpeakerTag.textContent = 'STAGE 1 • MAIN HALL';
+      }
+
+      // 7. Blackout Indicator
+      chkBlackout.checked = !!state.blackout;
+      if (state.blackout) {
+        monitorStatusText.textContent = 'BLACKOUT';
+      }
+    });
+
+    // Initialize audio on user interaction
+    window.addEventListener('click', () => {
+      if (window.stageAudio) window.stageAudio.init();
+    }, { once: true });
+  </script>
+</body>
+</html>

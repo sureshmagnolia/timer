@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auditorium Stage Display - Conference Countdown Timer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="display.css">
+</head>
+<body class="theme-cyber-black">
+
+  <!-- Dynamic Ambient Backlight Glow -->
+  <div class="ambient-glow" id="ambientGlow"></div>
+
+  <!-- Stage Screen Container -->
+  <div class="stage-container" id="stageContainer" title="Double click to toggle fullscreen">
+
+    <!-- Top Info Bar: Speaker & Live Time Clock -->
+    <header class="stage-header">
+      <div class="speaker-badge" id="speakerBadge">
+        <span class="speaker-dot" id="speakerDot"></span>
+        <span class="speaker-name" id="speakerNameDisplay">AUDITORIUM STAGE</span>
+        <span class="talk-title" id="talkTitleDisplay"></span>
+      </div>
+      <div class="clock-display" id="wallClock" title="Current Wall Clock">00:00:00</div>
+    </header>
+
+    <!-- Center Stage: Timer & High-Impact Visuals -->
+    <main class="timer-center-stage">
+      
+      <!-- Time's Up Flash Indicator Badge (Flashing on 0) -->
+      <div class="timeup-pill" id="timeupPill">
+        <span>🛑 TIME'S UP!</span>
+      </div>
+
+      <!-- Circular Loader Container & Central Digits -->
+      <div class="circular-progress-wrap" id="circularProgressWrap">
+        <!-- SVG Circular Ring Loader -->
+        <svg class="circular-progress-svg" viewBox="0 0 1000 1000">
+          <circle class="circle-track" cx="500" cy="500" r="440"></circle>
+          <circle class="circle-bar" id="circleBar" cx="500" cy="500" r="440"></circle>
+        </svg>
+
+        <!-- Massive Central Countdown Digits (Fills screen vertically) -->
+        <div class="digit-wrapper">
+          <div class="countdown-digits" id="timerDigits">10:00</div>
+        </div>
+      </div>
+
+      <!-- State Pill (Standby, Paused, etc.) -->
+      <div class="status-pill" id="statusPill">STANDBY</div>
+
+      <!-- Stage Message Banner (Direct prompts from operator desk) -->
+      <div class="stage-message-overlay" id="stageMessageOverlay">
+        <div class="stage-message-text" id="stageMessageText">2 MINUTES LEFT - WRAP UP</div>
+      </div>
+
+    </main>
+
+    <!-- Bottom Progress Bar -->
+    <footer style="width: 100%;">
+      <div class="stage-progress-container">
+        <div class="stage-progress-bar" id="progressBar" style="width: 100%;"></div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Auto-Hiding Stage Toolbar (Bottom Right) -->
+  <div class="stage-toolbar" id="stageToolbar">
+    
+    <!-- Theme Switcher Button -->
+    <button class="stage-btn" id="btnCycleTheme" title="Cycle Stage Theme (T)">
+      <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+    </button>
+
+    <!-- Format Switcher Button (Standard / Seconds) -->
+    <button class="stage-btn" id="btnCycleFormat" title="Toggle Seconds Alone Mode (S)">
+      <span style="font-size:12px; font-weight:800; font-family:var(--font-timer);" id="formatBtnLabel">SEC</span>
+    </button>
+
+    <!-- Sound Toggle -->
+    <button class="stage-btn" id="btnToggleSound" title="Toggle Audio Chimes (M)">
+      <svg id="iconSoundOn" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+      <svg id="iconSoundOff" style="display:none;" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27l4.01 4.01-1.01 1.01v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+    </button>
+
+    <!-- Fullscreen Toggle Button -->
+    <button class="stage-btn" id="btnFullscreen" title="Toggle Fullscreen (F)">
+      <!-- Enter Fullscreen Icon -->
+      <svg id="iconEnterFs" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+      <!-- Exit Fullscreen Icon -->
+      <svg id="iconExitFs" style="display:none;" viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-14v3h3v2h-5V5h2z"/></svg>
+    </button>
+  </div>
+
+  <!-- Scripts -->
+  <script src="audio.js"></script>
+  <script src="timer-core.js"></script>
+  <script>
+    // Initialize Display Client
+    const engine = new TimerEngine(false); // isMaster = false (Listener)
+
+    // Elements
+    const stageContainer = document.getElementById('stageContainer');
+    const timerDigits = document.getElementById('timerDigits');
+    const timeupPill = document.getElementById('timeupPill');
+    const statusPill = document.getElementById('statusPill');
+    const progressBar = document.getElementById('progressBar');
+    const wallClock = document.getElementById('wallClock');
+    const speakerNameDisplay = document.getElementById('speakerNameDisplay');
+    const talkTitleDisplay = document.getElementById('talkTitleDisplay');
+    const stageMessageOverlay = document.getElementById('stageMessageOverlay');
+    const stageMessageText = document.getElementById('stageMessageText');
+    const btnFullscreen = document.getElementById('btnFullscreen');
+    const iconEnterFs = document.getElementById('iconEnterFs');
+    const iconExitFs = document.getElementById('iconExitFs');
+    const btnToggleSound = document.getElementById('btnToggleSound');
+    const iconSoundOn = document.getElementById('iconSoundOn');
+    const iconSoundOff = document.getElementById('iconSoundOff');
+    const btnCycleTheme = document.getElementById('btnCycleTheme');
+    const btnCycleFormat = document.getElementById('btnCycleFormat');
+    const formatBtnLabel = document.getElementById('formatBtnLabel');
+
+    const circleBar = document.getElementById('circleBar');
+    const CIRCLE_CIRCUMFERENCE = 2764.6; // 2 * PI * 440
+
+    // Available themes list
+    const THEMES = [
+      'cyber-black',
+      'orbital-ring',
+      'high-contrast',
+      'warm-gold',
+      'neon-matrix',
+      'daylight-clean',
+      'midnight-navy'
+    ];
+
+    // Wall Clock Updater
+    function updateWallClock() {
+      const now = new Date();
+      wallClock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    }
+    setInterval(updateWallClock, 1000);
+    updateWallClock();
+
+    // Idle Mouse Cursor Auto-Hide
+    let idleTimer = null;
+    window.addEventListener('mousemove', () => {
+      document.body.classList.remove('idle-cursor');
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        document.body.classList.add('idle-cursor');
+      }, 3000);
+    });
+
+    // Cross-Browser Fullscreen Helpers
+    function isFullscreenActive() {
+      return !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+      );
+    }
+
+    function updateFullscreenIcons() {
+      const active = isFullscreenActive();
+      iconEnterFs.style.display = active ? 'none' : 'block';
+      iconExitFs.style.display = active ? 'block' : 'none';
+    }
+
+    function toggleFullscreen() {
+      const docEl = document.documentElement;
+      if (!isFullscreenActive()) {
+        const req = docEl.requestFullscreen ||
+                    docEl.webkitRequestFullscreen ||
+                    docEl.mozRequestFullScreen ||
+                    docEl.msRequestFullscreen;
+        if (req) {
+          req.call(docEl).catch(err => {
+            console.warn('Fullscreen request failed:', err);
+            // If in an iframe without permissions, pop open in standalone window
+            if (window.self !== window.top) {
+              window.open(window.location.href, '_blank', 'width=1920,height=1080');
+            }
+          });
+        }
+      } else {
+        const exit = document.exitFullscreen ||
+                     document.webkitExitFullscreen ||
+                     document.mozCancelFullScreen ||
+                     document.msExitFullscreen;
+        if (exit) {
+          exit.call(document).catch(err => console.warn(err));
+        }
+      }
+    }
+
+    // Fullscreen Event Listeners
+    btnFullscreen.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFullscreen();
+    });
+
+    // Double-click anywhere on the display to toggle fullscreen
+    stageContainer.addEventListener('dblclick', toggleFullscreen);
+
+    ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(evt => {
+      document.addEventListener(evt, updateFullscreenIcons);
+    });
+
+    // Cycle theme button
+    btnCycleTheme.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const curr = engine.state.theme || 'cyber-black';
+      const idx = THEMES.indexOf(curr);
+      const nextTheme = THEMES[(idx + 1) % THEMES.length];
+      engine.setTheme(nextTheme);
+    });
+
+    // Cycle format button (Standard MM:SS vs Seconds Alone)
+    btnCycleFormat.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const curr = engine.state.timeFormat || 'standard';
+      const nextFmt = curr === 'standard' ? 'seconds' : (curr === 'seconds' ? 'auto' : 'standard');
+      engine.setTimeFormat(nextFmt);
+    });
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      } else if (e.key === 'm' || e.key === 'M') {
+        engine.setSound(!engine.state.soundEnabled);
+      } else if (e.key === 't' || e.key === 'T') {
+        btnCycleTheme.click();
+      } else if (e.key === 's' || e.key === 'S') {
+        btnCycleFormat.click();
+      }
+    });
+
+    // Sound toggle button
+    btnToggleSound.addEventListener('click', (e) => {
+      e.stopPropagation();
+      engine.setSound(!engine.state.soundEnabled);
+      if (window.stageAudio) window.stageAudio.init();
+    });
+
+    // Subscribe to Timer Updates
+    engine.subscribe((state) => {
+      // 1. Theme application
+      THEMES.forEach(t => document.body.classList.remove(`theme-${t}`));
+      document.body.classList.add(`theme-${state.theme || 'cyber-black'}`);
+
+      // 2. Blackout Mode
+      document.body.classList.toggle('state-blackout', !!state.blackout);
+
+      // 3. Alert Level Theme Classes (Warning, Danger, Time's Up Flash)
+      const level = engine.getCurrentAlertLevel();
+      document.body.classList.toggle('state-warning', level === 'warning');
+      document.body.classList.toggle('state-danger', level === 'danger');
+      document.body.classList.toggle('state-timeup', level === 'timeup');
+
+      // 4. Format label button
+      if (state.timeFormat === 'seconds') {
+        formatBtnLabel.textContent = 'SEC';
+      } else if (state.timeFormat === 'auto') {
+        formatBtnLabel.textContent = 'AUTO';
+      } else {
+        formatBtnLabel.textContent = 'MIN';
+      }
+
+      // 5. Digits Display & ZERO HIT FLASH (No negative counting)
+      if (state.isTimeUp || state.remainingSec === 0) {
+        // Freeze at 00:00 or 0, and intense FLASH
+        if (state.timeFormat === 'seconds') {
+          timerDigits.textContent = '0';
+          timerDigits.classList.add('seconds-format');
+          timerDigits.classList.remove('long-format');
+        } else {
+          timerDigits.textContent = '00:00';
+          timerDigits.classList.remove('seconds-format', 'long-format');
+        }
+        statusPill.textContent = "TIME'S UP!";
+        statusPill.style.color = '#ff113a';
+        statusPill.style.borderColor = '#ff113a';
+      } else {
+        const formatted = TimerEngine.formatDisplayTime(state.remainingSec, state.timeFormat);
+        timerDigits.textContent = formatted;
+
+        // Apply specialized sizing classes
+        const isSecOnly = state.timeFormat === 'seconds' || (state.timeFormat === 'auto' && state.remainingSec < 60);
+        timerDigits.classList.toggle('seconds-format', isSecOnly);
+        timerDigits.classList.toggle('long-format', !isSecOnly && formatted.length > 5);
+
+        // Status pill text
+        if (state.status === 'idle') {
+          statusPill.textContent = 'STANDBY';
+          statusPill.style.color = '#94a3b8';
+          statusPill.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+        } else if (state.status === 'paused') {
+          statusPill.textContent = 'PAUSED';
+          statusPill.style.color = '#fbbf24';
+          statusPill.style.borderColor = '#fbbf24';
+        } else if (state.status === 'running') {
+          statusPill.textContent = 'STAGE LIVE';
+          statusPill.style.color = '#10b981';
+          statusPill.style.borderColor = '#10b981';
+        }
+      }
+
+      // 6. Progress Bar & Circular Ring Loader
+      if (state.totalDurationSec > 0) {
+        let pct = (state.remainingSec / state.totalDurationSec) * 100;
+        if (state.isTimeUp) pct = 0;
+        progressBar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+
+        // Update SVG circular loader ring
+        if (circleBar) {
+          const clamped = Math.max(0, Math.min(100, pct));
+          const offset = CIRCLE_CIRCUMFERENCE * (1 - (clamped / 100));
+          circleBar.style.strokeDashoffset = offset;
+        }
+      }
+
+      // 7. Speaker Info
+      speakerNameDisplay.textContent = state.speakerName || 'AUDITORIUM STAGE';
+      talkTitleDisplay.textContent = state.talkTitle ? `• ${state.talkTitle}` : '';
+
+      // 8. Stage Message Alert
+      if (state.messageVisible && state.message) {
+        stageMessageText.textContent = state.message;
+        stageMessageOverlay.classList.add('visible');
+        if (level === 'danger' || level === 'timeup' || state.message.toLowerCase().includes('stop') || state.message.toLowerCase().includes('wrap')) {
+          stageMessageOverlay.classList.add('alert-urgent');
+        } else {
+          stageMessageOverlay.classList.remove('alert-urgent');
+        }
+      } else {
+        stageMessageOverlay.classList.remove('visible');
+      }
+
+      // 9. Sound button icon state
+      iconSoundOn.style.display = state.soundEnabled ? 'block' : 'none';
+      iconSoundOff.style.display = state.soundEnabled ? 'none' : 'block';
+    });
+
+    // Request initial state from controller
+    engine.requestSync();
+
+    // Enable audio on first user touch / click
+    window.addEventListener('click', () => {
+      if (window.stageAudio) window.stageAudio.init();
+    }, { once: true });
+  </script>
+</body>
+</html>
